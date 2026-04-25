@@ -3,32 +3,31 @@ package edu.desu.cis.robot.control;
 import edu.desu.cis.robot.commands.MBot2;
 
 /**
- * Component: Sample Identification (Sia's Role)
- * Logic: Monitor sensors for Red Sample, signal the find, and stop movement.
+ *
+ * Logic: Monitor camera for Red Sample, signal the find, and stop movement.
  */
 public class SampleDetection {
 
-    // Threshold for detecting "Red" - adjust this based on lab testing
-    private final int RED_THRESHOLD = 200; 
     public boolean isSampleFound = false;
 
     /**
-     * Executes the detection logic.
-     * @param mbot The active mBot instance from the controller.
+     *
+     * @param mbot The active robot instance.
      */
     public void execute(MBot2 mbot) {
         
-        // 1. Read the color sensor intensity
-        int redValue = mbot.getColorSensorValue(); 
+        // 1. Read the color name from the camera
+        // The MBot2 library returns a String like "red", "green", or "none"
+        String detectedColor = mbot.getColorObjectFromCamera(); 
 
-        // 2. TRIGGER: If red intensity is high and we haven't flagged it yet
-        if (redValue > RED_THRESHOLD && !isSampleFound) {
+        // 2. TRIGGER: Check if the camera sees "red"
+        if (detectedColor != null && detectedColor.equalsIgnoreCase("red") && !isSampleFound) {
             isSampleFound = true;
 
-            // 3. ACTION: Halt movement
+            // 3. ACTION: Stop the robot using the validated stop() method
             mbot.stop();
 
-            // 4. SIGNAL: Trigger the required audible/visual cue
+            // 4. SIGNAL: Turn on the LEDs for a visual cue
             triggerStarfleetSignal(mbot);
             
             System.out.println("Mission Success: Red Sample Identified by Sia.");
@@ -36,13 +35,15 @@ public class SampleDetection {
     }
 
     /**
-     * Fulfills the requirement for an audible and visual signal upon discovery.
+     * Uses validated MBot2 methods for signaling.
      */
     private void triggerStarfleetSignal(MBot2 mbot) {
-        // Visual: Set the board/sensor LEDs to Red
-        mbot.setDisplayColor(255, 0, 0); 
+        // Visual: Turn on LEDs 1 and 2 to Red (RGB: 255, 0, 0)
+        // Based on MBot2.java: turnLedOn(int id, int red, int green, int blue)
+        mbot.turnLedOn(1, 255, 0, 0); 
+        mbot.turnLedOn(2, 255, 0, 0); 
         
-        // Audible: Play a success tone (A4 note)
-        mbot.playTone(440, 500);         
+         
+        // so we are using the LEDs as the primary signal.
     }
 }
