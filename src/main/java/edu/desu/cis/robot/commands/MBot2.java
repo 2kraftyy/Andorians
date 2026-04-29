@@ -353,10 +353,10 @@ public class MBot2 {
     public String getColorObjectFromCamera(boolean needsLight) {
         CommandResult<JsonNode> result =
                 execute("GET_SENSOR",
-                    Map.of(
-                            "sensor", "CAMERA_COLOR",
-                            "light", needsLight ? "YES" : "NO"
-                    )
+                        Map.of(
+                                "sensor", "CAMERA_COLOR",
+                                "light", needsLight ? "YES" : "NO"
+                        )
                 );
 
         return result.data().get("color").asText();
@@ -480,7 +480,15 @@ public class MBot2 {
         execute("STOP_ALL_BEHAVIORS", null);
     }
 
-
+    /**
+     * Commands the robot to detect a movable object,
+     * push it out of the way and return to original
+     * position and heading to resume navigation.
+     * Synchronous - blocks until complete.
+     */
+    public void moveObject() {
+        execute("MOVE_OBJECT", null);
+    }
 
     private CommandResult<JsonNode> execute(String command, Map<String,Object> params) {
 
