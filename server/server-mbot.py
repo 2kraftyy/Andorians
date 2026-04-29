@@ -990,3 +990,32 @@ def move_object_behavior():
 def handle_move_object(payload):
     move_object_behavior()
     return ok_response("MOVE_OBJECT complete!")
+
+def follow_line_behavior():
+    line = cyberpi.quad_rgb_sensor.get_line_sta()
+
+    kp = 0.4
+    base_speed = 30
+
+    if line == 0:
+        error = 3
+    elif 1 < line < 4:
+        error = -1
+    elif line < 7:
+        error = -2
+    else:
+        error = -4
+
+    correction = error * kp
+    left_speed = base_speed + correction
+    right_speed = base_speed - correction  # Fixed: was wrong sign
+
+    left_speed = max(min(left_speed, 50), -50)
+    right_speed = max(min(right_speed, 50), -50)
+
+    mbot2.drive_speed(left_speed, right_speed)
+
+@register_command("FOLLOW_LINE")
+def handle_following_line():
+    scheduler.start_behavior("FOLLOW_LINE", follow_line_behavior)
+    return ok_response("We're following the line!")
