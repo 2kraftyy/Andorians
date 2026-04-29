@@ -6,10 +6,7 @@ import edu.desu.cis.robot.commands.MBot2;
  *
  * Logic: Monitor camera for Red Sample, signal the find, and stop movement.
  */
-public class SampleDetection {
-
-    public boolean isSampleFound = false;
-
+public class ObjectDetection {
     /**
      *
      * @param mbot The active robot instance.
@@ -18,21 +15,21 @@ public class SampleDetection {
         
         // 1. Read the color name from the camera
         // The MBot2 library returns a String like "red", "green", or "none"
-        String detectedColor = mbot.getColorObjectFromCamera(); 
+        String detectedColor = mbot.getColorObjectFromCamera();
 
         // 2. TRIGGER: Check if the camera sees "red"
-        if (detectedColor != null && detectedColor.equalsIgnoreCase("red") && !isSampleFound) {
-            isSampleFound = true;
+        if (detectedColor != null && detectedColor.equalsIgnoreCase("red")) {
 
             // 3. ACTION: Stop the robot using the validated stop() method
             mbot.stop();
 
             // 4. SIGNAL: Turn on the LEDs for a visual cue
             triggerStarfleetSignal(mbot);
-            
+
             System.out.println("Mission Success: Red Sample Identified by Sia.");
         }
     }
+
 
     /**
      * Uses validated MBot2 methods for signaling.
@@ -46,4 +43,5 @@ public class SampleDetection {
          
         // so we are using the LEDs as the primary signal.
     }
+
 }

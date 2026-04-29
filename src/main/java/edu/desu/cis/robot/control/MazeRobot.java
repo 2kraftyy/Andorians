@@ -10,13 +10,15 @@ import edu.desu.cis.robot.service.SensorSnapshot;
 
 public class MazeRobot extends RobotController {
     // Fields
-    int stopThreshold;
+    public boolean sampleFound;
     RobotState robotState;
+    int stopThreshold;
 
     // Constructor
     public MazeRobot(String robotName) {
         super(robotName);
 
+        sampleFound = false;
         robotState = RobotState.CRUISING;
         stopThreshold = 10;
     }
@@ -25,33 +27,71 @@ public class MazeRobot extends RobotController {
         this.robotState = newState;
     }
 
+    // FULLY FUNCTIONAL
+    public String detectObject(){
+        String detectedColor = mbot.getColorObjectFromCamera();
+
+        if (detectedColor == "GREEN") {
+            return "Movable Object";
+        }
+        else if (detectedColor == "BLUE") {
+            return "Immovable Object";
+        }
+        else if (detectedColor == "RED") {
+            return "Sample";
+        }
+        else if (detectedColor == "YELLOW") {
+            return "Insertion Point";
+        }
+
+        return null;
+    }
+
     public void run(){
         SensorSnapshot sensorData = awaitNewData();
         //-- TODO: IMPLEMENT BEHAVIORS INSIDE STATES WHEN THEY ARE COMPLETED
+
+        while (true){
+             String detectedObject = this.detectObject();
+             if (detectedObject != null) {
+
+             }
+        }
+
+        /*
         if (robotState == RobotState.CRUISING) {
-            System.out.println("Forward");
             mbot.avoidCrashing(this.stopThreshold);
             mbot.forward(50);
 
             // Bot is close to an object
             if (sensorData.distance() < this.stopThreshold){
                 // mbot.stop();
+                // Disable behaviors running in background
 
-                // Check type of object to determine which state to transition to
-                // if Obj is a movable object transition to MOVING_OBJECT
-                // if Obj is an immovable object transition to AVOIDING_OBJECT
+                // Transition into analyzing object state
+                // Added extra state for cleaner code & more straightforward FSM implementation
+                this.switchState(RobotState.ANALYZING_OBJECT);
             }
+        }
+
+        else if (robotState == RobotState.ANALYZING_OBJECT) {
+            // If obj is a movable object transition to MOVING_OBJECT
+            // If obj is an immovable object transition to AVOIDING_OBJECT
+            // If obj is the sample,
+            // this.switchState(RobotState.AVOIDING_OBJECT) or
+            // this.switchState(RobotState.MOVING_OBJECT)
         }
 
         else if (robotState == RobotState.AVOIDING_OBJECT) {
             // Do a procedure to avoid the object (rotate either L or R and move forward)
             // Go back to CRUISING
-
+            this.switchState(RobotState.CRUISING);
         }
         else if (robotState == RobotState.MOVING_OBJECT) {
-            // Run through the object without crashing behavior
-            // Once done running through and no obj is infront go back to CRUISING
+            // Do a procedure that moves the object
+            // Once done moving the object and no obj is infront go back to CRUISING
 
+            this.switchState(RobotState.CRUISING);
         }
         else {
             // Returning
@@ -59,6 +99,8 @@ public class MazeRobot extends RobotController {
             // First turn 180
             // Then go back to CRUISING
         }
+
+         */
     }
 
     /**
