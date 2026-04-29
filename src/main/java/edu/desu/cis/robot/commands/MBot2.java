@@ -490,6 +490,11 @@ public class MBot2 {
         execute("MOVE_OBJECT", null);
     }
 
+    public void test() {
+        // For cruising
+        execute("TEST", null);
+    }
+
     private CommandResult<JsonNode> execute(String command, Map<String,Object> params) {
 
         String json = codec.encodeCommand(command, params);

@@ -943,30 +943,51 @@ def handle_move_object(payload):
     return ok_response("MOVE_OBJECT complete!")
 
 def follow_line_behavior():
-    line = cyberpi.quad_rgb_sensor.get_line_sta()
+    if not arbiter.acquire("line", "FOLLOW_LINE", 10, blocking=False):
+        return
+    try:
+        line = mbuild.quad_rgb_sensor.get_line_sta()  # Step 1
+    finally:
+        arbiter.release("line", "FOLLOW_LINE")
 
-    kp = 0.4
-    base_speed = 30
+    # --- Calculate steering ---
+    kp = 0.4          # Step 2
+    base_speed = 30   # Step 3
 
     if line == 0:
-        error = 3
+        error = -50   # Step 4: No line detected, steer right
     elif 1 < line < 4:
-        error = -1
+        error = 25    # Step 5: Slightly too far right, steer slightly left
     elif line < 7:
-        error = -2
+        error = 40    # Step 6: Further right, steer left harder
     else:
-        error = -4
+        error = 75    # Step 7: Hard left (e.g. line == 15, sharp left turn)
 
-    correction = error * kp
-    left_speed = base_speed + correction
-    right_speed = base_speed - correction  # Fixed: was wrong sign
+    correction = error * kp                        # Step 8
 
-    left_speed = max(min(left_speed, 50), -50)
-    right_speed = max(min(right_speed, 50), -50)
+    em1_speed = base_speed + correction            # Step 9
+    em1_speed = min(max(em1_speed, -50), 50)      # Step 10
 
-    mbot2.drive_speed(left_speed, right_speed)
+    em2_speed = -base_speed + correction           # Step 11
+    em2_speed = min(max(em2_speed, -50), 50)      # Step 12
+
+    # --- Apply to motors ---
+    if not arbiter.acquire("motors", "FOLLOW_LINE", 10, blocking=False):
+        return
+    try:
+        mbot2.drive_speed(em1_speed, em2_speed)   # Step 13
+    finally:
+        arbiter.release("motors", "FOLLOW_LINE")
 
 @register_command("FOLLOW_LINE")
 def handle_following_line(payload):
     scheduler.start_behavior("FOLLOW_LINE", follow_line_behavior)
     return ok_response("We're following the line!")
+
+def test_smh():
+    cyberpi.console.print('tester')
+
+@register_command("TEST")
+def tester(payload):
+    scheduler.start_behavior("TEST", test_smh)
+    return ok_response("we did it!")
