@@ -960,11 +960,14 @@ def move_object_behavior():
     if arbiter.acquire("motors", "MOVE_OBJECT", 50):
         try:
             # Turn 180 so back faces the object
+            cyberpi.console.print("Tried to turn")
             turn(180)
+            cyberpi.console.print("Got past yield")
 
 
             # Move backward towards the object
             mbot2.straight(-(distance * 1.3))
+            cyberpi.console.print("hello")
 
             # Push object sideways
             mbot2.drive_speed(-30, 50)

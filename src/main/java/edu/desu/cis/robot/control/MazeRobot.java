@@ -51,11 +51,10 @@ public class MazeRobot extends RobotController {
         SensorSnapshot sensorData = awaitNewData();
         //-- TODO: IMPLEMENT BEHAVIORS INSIDE STATES WHEN THEY ARE COMPLETED
 
-        while (true){
-             String detectedObject = this.detectObject();
-             if (detectedObject != null) {
 
-             }
+       while (true) {
+            //mbot.forward(50);
+            mbot.moveObject();
         }
 
         /*
