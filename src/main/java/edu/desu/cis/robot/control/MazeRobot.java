@@ -31,30 +31,34 @@ public class MazeRobot extends RobotController {
     public String detectObject(){
         String detectedColor = mbot.getColorObjectFromCamera();
 
-        if (detectedColor == "GREEN") {
+        if (detectedColor.equals("GREEN")) {
             return "Movable Object";
         }
-        else if (detectedColor == "BLUE") {
+        else if (detectedColor.equals("BLUE")) {
             return "Immovable Object";
         }
-        else if (detectedColor == "RED") {
+        else if (detectedColor.equals("RED")) {
             return "Sample";
         }
-        else if (detectedColor == "YELLOW") {
+        else if (detectedColor.equals("YELLOW")) {
             return "Insertion Point";
         }
 
         return null;
     }
 
+    // FULLY FUNCTIONAL
+    public void moveObject(){
+        mbot.moveObject();
+    }
+
     public void run(){
         SensorSnapshot sensorData = awaitNewData();
         //-- TODO: IMPLEMENT BEHAVIORS INSIDE STATES WHEN THEY ARE COMPLETED
-
-
+        mbot.followLine();
        while (true) {
             //mbot.forward(50);
-            mbot.moveObject();
+
         }
 
         /*
@@ -108,7 +112,6 @@ public class MazeRobot extends RobotController {
      */
     public static void main(String[] args) {
         try (MazeRobot amazin = new MazeRobot("Sieh")) {
-            // System.out.print("pls work");
             amazin.run();
         }
     }

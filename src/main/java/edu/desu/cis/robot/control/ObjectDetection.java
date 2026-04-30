@@ -30,7 +30,6 @@ public class ObjectDetection {
         }
     }
 
-
     /**
      * Uses validated MBot2 methods for signaling.
      */

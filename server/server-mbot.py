@@ -1001,17 +1001,17 @@ def follow_line_behavior():
         arbiter.release("line", "FOLLOW_LINE")
 
     # --- Calculate steering ---
-    kp = 0.4          # Step 2
+    kp = 0.4         # Step 2
     base_speed = 30   # Step 3
 
     if line == 0:
-        error = -50   # Step 4: No line detected, steer right
+        error = 50   # Step 4: No line detected, steer right
     elif 1 < line < 4:
-        error = 25    # Step 5: Slightly too far right, steer slightly left
+        error = -25    # Step 5: Slightly too far right, steer slightly left
     elif line < 7:
-        error = 40    # Step 6: Further right, steer left harder
+        error = -40    # Step 6: Further right, steer left harder
     else:
-        error = 75    # Step 7: Hard left (e.g. line == 15, sharp left turn)
+        error = -75    # Step 7: Hard left (e.g. line == 15, sharp left turn)
 
     correction = error * kp                        # Step 8
 
