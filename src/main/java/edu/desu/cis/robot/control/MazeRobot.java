@@ -20,7 +20,7 @@ public class MazeRobot extends RobotController {
 
         sampleFound = false;
         robotState = RobotState.CRUISING;
-        stopThreshold = 10;
+        stopThreshold = 7;
     }
 
     public void switchState(RobotState newState){
@@ -47,20 +47,11 @@ public class MazeRobot extends RobotController {
         return null;
     }
 
-    // FULLY FUNCTIONAL
-    public void moveObject(){
-        mbot.moveObject();
-    }
-
-    public void run(){
-
-        //-- TODO: IMPLEMENT BEHAVIORS INSIDE STATES WHEN THEY ARE COMPLETED
-        //mbot.followLine();
+    public void FINITE_STATE_MACHINE(){
         boolean SCHEDULED_BEHAVIORS_ACTIVE = false;
 
         while (true) {
             if (robotState == RobotState.CRUISING) {
-
                 if (!SCHEDULED_BEHAVIORS_ACTIVE) {
                     SCHEDULED_BEHAVIORS_ACTIVE = true;
                     mbot.avoidCrashing(this.stopThreshold);
@@ -76,7 +67,7 @@ public class MazeRobot extends RobotController {
                     System.out.println("Object closer than threshold");
                     mbot.stop();
                     // Disable behaviors running in background
-                    mbot.stopAllBehaviors(); SCHEDULED_BEHAVIORS_ACTIVE = false;
+                    mbot.stopBehavior("AVOID_CRASHING"); SCHEDULED_BEHAVIORS_ACTIVE = false;
                     System.out.println("Bot stopped & behaviors disabled");
 
                     // Transition into analyzing object state
@@ -91,33 +82,37 @@ public class MazeRobot extends RobotController {
 
                 String detectedObject = detectObject();
                 System.out.println(detectedObject);
-                if (detectedObject.equals("Immovable Object")){
-                    this.switchState(RobotState.AVOIDING_OBJECT);
+                if (detectedObject != null) {
+                    // Guard against null pointer exceptions
+                    if (detectedObject.equals("Immovable Object")){
+                        this.switchState(RobotState.AVOIDING_OBJECT);
+                    }
+
+                    else if (detectedObject.equals("Movable Object")) {
+                        this.switchState(RobotState.MOVING_OBJECT);
+                    }
+
+                    else if (detectedObject.equals("Sample")) {
+                        this.switchState(RobotState.COLLECTING_SAMPLE);
+                    }
+
+                    else if (detectedObject.equals("Insertion Point")) {
+                        this.switchState(RobotState.MISSION_COMPLETE);
+                    }
                 }
 
-                else if (detectedObject.equals("Movable Object")) {
-                    this.switchState(RobotState.MOVING_OBJECT);
-                }
-
-                else if (detectedObject.equals("Sample")) {
-                    this.switchState(RobotState.COLLECTING_SAMPLE);
-                }
-
-                else if (detectedObject.equals("Insertion Point")) {
-                    this.switchState(RobotState.MISSION_COMPLETE);
-                }
             }
 
             else if (robotState == RobotState.MOVING_OBJECT) {
-                // Do a procedure to avoid the object (rotate either L or R and move forward)
+                // Do a procedure to move the object
                 System.out.println("Moving Object");
-                moveObject();
+                mbot.moveObject();
                 // Go back to CRUISING
                 System.out.println("Object Moved");
                 this.switchState(RobotState.CRUISING);
             }
             else if (robotState == RobotState.AVOIDING_OBJECT) {
-                // Do a procedure that moves the object
+                // Do a procedure that avoids the object
                 // Once done moving the object and no obj is infront go back to CRUISING
 
                 this.switchState(RobotState.CRUISING);
@@ -127,7 +122,16 @@ public class MazeRobot extends RobotController {
                 break; // Exit the loop
             }
         }
-        System.out.println("Finished");
+    }
+
+    public void run(){
+
+        System.out.println("start");
+        mbot.moveObject();
+        while (true){
+
+        }
+        //System.out.println("Finished");
     }
 
     /**

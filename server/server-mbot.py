@@ -9,7 +9,9 @@ import _thread
 
 
 # --- Configuration ---
-ROBOT_ID = "Sieh" # --// THIS IS THE ROBOTS NAME, WE'RE RUNNING THIS ON THE ROBOT
+WIFI_SSID = "Sieh"
+WIFI_PASSWORD = "cingreek"
+ROBOT_ID = "Sieh"
 DISCOVERY_PORT = 9998
 COMMAND_PORT = 9990
 TELEMETRY_PORT = 9991
@@ -346,7 +348,6 @@ def camera_learn(mode):
             if mode == "COLOR":
                 mbuild.smart_camera.set_mode(mode="color")
                 mbuild.smart_camera.open_light()
-                cyberpi.display.clear()
                 for sign_id in COLOR_NAMES.keys():
                     cyberpi.display.show_label(COLOR_NAMES[sign_id], 16, 'center')
                     time.sleep(pause)
@@ -768,7 +769,7 @@ def learn_colors():
 # Startup
 # ============================================================
 
-cyberpi.wifi.connect("Sieh", "cingreek") # --// This is my HOTSPOT INFO
+cyberpi.wifi.connect(WIFI_SSID, WIFI_PASSWORD)
 cyberpi.display.show_label("connecting to wifi...", 12, "center")
 while not cyberpi.wifi.is_connect():
     time.sleep(0.1)
@@ -862,7 +863,6 @@ def handle_stop_at_line(payload):
     scheduler.start_behavior("STOP_AT_LINE", stop_at_line_behavior)
     return ok_response("STOP_AT_LINE behavior started")
 
-
 @register_command("FLASH_LED")
 def handle_flash_led(payload):
     params = payload.get("parameters", {})
@@ -871,11 +871,9 @@ def handle_flash_led(payload):
     g      = int(params.get("green", 0))
     b      = int(params.get("blue",  255))
     delay  = float(params.get("delay", 0.3))
-
     if times < 1 or times > 20:
         return error_response("INVALID_PARAM",
                               "times must be between 1 and 20")
-
     if arbiter.acquire("led", "FLASH_LED", 50):
         try:
             for _ in range(times):
@@ -887,87 +885,19 @@ def handle_flash_led(payload):
         finally:
             arbiter.release("led", "FLASH_LED")
 
-
-def move_object_behavior():
-    # Wait for robot to fully stop
-    time.sleep(0.5)
-
-    # Read distance to object
-    if not arbiter.acquire("ultrasonic", "MOVE_OBJECT", 50, blocking=False):
-        return
-    try:
-        distance = mbuild.ultrasonic2.get()
-    finally:
-        arbiter.release("ultrasonic", "MOVE_OBJECT")
-
-    # If nothing detected do nothing
-    if distance is None or distance > 15:
-        return
-
-    # Acquire motors before moving
-    if not arbiter.acquire("motors", "MOVE_OBJECT", 50, blocking=False):
-        return
-    try:
-        # Step 3: Turn 180 so back faces object
-        turn(180)
-        time.sleep(0.5)
-
-        # Step 4: Drive toward object
-        mbot2.drive_speed(-40, 40)
-        time.sleep(2)
-        mbot2.drive_speed(0, 0)
-        time.sleep(0.5)
-
-        # Step 5: Push object sideways
-        mbot2.drive_speed(-30, 50)
-        time.sleep(3)
-        mbot2.drive_speed(0, 0)
-        time.sleep(0.5)
-
-        # Step 6: Return to original position
-        mbot2.drive_speed(40, -40)
-        time.sleep(2)
-        mbot2.drive_speed(0, 0)
-        time.sleep(0.5)
-
-        # Step 7: Turn back to face original direction
-        turn(180)
-        time.sleep(0.5)
-
-    finally:
-        arbiter.release("motors", "MOVE_OBJECT")
-
-
-@register_command("MOVE_OBJECT")
-def handle_move_object(payload):
-    move_object_behavior()
-    return ok_response("MOVE_OBJECT complete!")
-
 def move_object_behavior():
 
     # Read distance to object
-    if arbiter.acquire("ultrasonic", "MOVE_OBJECT", 50):
-        try:
-            distance = mbuild.ultrasonic2.get()
-        finally:
-            arbiter.release("ultrasonic", "MOVE_OBJECT")
-
-    # If nothing detected do nun
-    if distance is None or distance > 15:
-        return
 
     # Acquire motors before moving
     if arbiter.acquire("motors", "MOVE_OBJECT", 50):
         try:
             # Turn 180 so back faces the object
-            cyberpi.console.print("Tried to turn")
             turn(180)
-            cyberpi.console.print("Got past yield")
 
 
             # Move backward towards the object
-            mbot2.straight(-(distance * 1.3))
-            cyberpi.console.print("hello")
+            mbot2.straight(-9)
 
             # Push object sideways
             mbot2.drive_speed(-30, 50)
@@ -1001,8 +931,8 @@ def follow_line_behavior():
         arbiter.release("line", "FOLLOW_LINE")
 
     # --- Calculate steering ---
-    kp = 0.4         # Step 2
-    base_speed = 30   # Step 3
+    kp = 0.35         # Step 2
+    base_speed = 20   # Step 3
 
     if line == 0:
         error = 50   # Step 4: No line detected, steer right
@@ -1011,7 +941,7 @@ def follow_line_behavior():
     elif line < 7:
         error = -40    # Step 6: Further right, steer left harder
     else:
-        error = -75    # Step 7: Hard left (e.g. line == 15, sharp left turn)
+        error = -60    # Step 7: Hard left (e.g. line == 15, sharp left turn)
 
     correction = error * kp                        # Step 8
 
@@ -1034,3 +964,4 @@ def follow_line_behavior():
 def handle_follow_line(payload):
     scheduler.start_behavior("FOLLOW_LINE", follow_line_behavior)
     return ok_response("Following Line")
+
