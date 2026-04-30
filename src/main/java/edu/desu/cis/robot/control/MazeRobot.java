@@ -53,57 +53,81 @@ public class MazeRobot extends RobotController {
     }
 
     public void run(){
-        SensorSnapshot sensorData = awaitNewData();
+
         //-- TODO: IMPLEMENT BEHAVIORS INSIDE STATES WHEN THEY ARE COMPLETED
-        mbot.followLine();
-       while (true) {
-            //mbot.forward(50);
+        //mbot.followLine();
+        boolean SCHEDULED_BEHAVIORS_ACTIVE = false;
 
-        }
+        while (true) {
+            if (robotState == RobotState.CRUISING) {
 
-        /*
-        if (robotState == RobotState.CRUISING) {
-            mbot.avoidCrashing(this.stopThreshold);
-            mbot.forward(50);
+                if (!SCHEDULED_BEHAVIORS_ACTIVE) {
+                    SCHEDULED_BEHAVIORS_ACTIVE = true;
+                    mbot.avoidCrashing(this.stopThreshold);
+                    System.out.println("Starting behaviors");
+                }
 
-            // Bot is close to an object
-            if (sensorData.distance() < this.stopThreshold){
-                // mbot.stop();
-                // Disable behaviors running in background
+                mbot.followLine();
+                System.out.println("Cruising");
 
-                // Transition into analyzing object state
-                // Added extra state for cleaner code & more straightforward FSM implementation
-                this.switchState(RobotState.ANALYZING_OBJECT);
+                // Bot is close to an object
+                SensorSnapshot sensorData = awaitNewData();
+                if (sensorData.distance() < this.stopThreshold){
+                    System.out.println("Object closer than threshold");
+                    mbot.stop();
+                    // Disable behaviors running in background
+                    mbot.stopAllBehaviors(); SCHEDULED_BEHAVIORS_ACTIVE = false;
+                    System.out.println("Bot stopped & behaviors disabled");
+
+                    // Transition into analyzing object state
+                    // Added extra state for cleaner code & more straightforward FSM implementation
+                    this.switchState(RobotState.ANALYZING_OBJECT);
+                }
+            }
+
+            else if (robotState == RobotState.ANALYZING_OBJECT) {
+                // If obj is a movable object transition to MOVING_OBJECT
+                // If obj is an immovable object transition to AVOIDING_OBJECT etc
+
+                String detectedObject = detectObject();
+                System.out.println(detectedObject);
+                if (detectedObject.equals("Immovable Object")){
+                    this.switchState(RobotState.AVOIDING_OBJECT);
+                }
+
+                else if (detectedObject.equals("Movable Object")) {
+                    this.switchState(RobotState.MOVING_OBJECT);
+                }
+
+                else if (detectedObject.equals("Sample")) {
+                    this.switchState(RobotState.COLLECTING_SAMPLE);
+                }
+
+                else if (detectedObject.equals("Insertion Point")) {
+                    this.switchState(RobotState.MISSION_COMPLETE);
+                }
+            }
+
+            else if (robotState == RobotState.MOVING_OBJECT) {
+                // Do a procedure to avoid the object (rotate either L or R and move forward)
+                System.out.println("Moving Object");
+                moveObject();
+                // Go back to CRUISING
+                System.out.println("Object Moved");
+                this.switchState(RobotState.CRUISING);
+            }
+            else if (robotState == RobotState.AVOIDING_OBJECT) {
+                // Do a procedure that moves the object
+                // Once done moving the object and no obj is infront go back to CRUISING
+
+                this.switchState(RobotState.CRUISING);
+            }
+            else if (robotState == RobotState.MISSION_COMPLETE)  {
+
+                break; // Exit the loop
             }
         }
-
-        else if (robotState == RobotState.ANALYZING_OBJECT) {
-            // If obj is a movable object transition to MOVING_OBJECT
-            // If obj is an immovable object transition to AVOIDING_OBJECT
-            // If obj is the sample,
-            // this.switchState(RobotState.AVOIDING_OBJECT) or
-            // this.switchState(RobotState.MOVING_OBJECT)
-        }
-
-        else if (robotState == RobotState.AVOIDING_OBJECT) {
-            // Do a procedure to avoid the object (rotate either L or R and move forward)
-            // Go back to CRUISING
-            this.switchState(RobotState.CRUISING);
-        }
-        else if (robotState == RobotState.MOVING_OBJECT) {
-            // Do a procedure that moves the object
-            // Once done moving the object and no obj is infront go back to CRUISING
-
-            this.switchState(RobotState.CRUISING);
-        }
-        else {
-            // Returning
-
-            // First turn 180
-            // Then go back to CRUISING
-        }
-
-         */
+        System.out.println("Finished");
     }
 
     /**
