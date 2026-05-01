@@ -936,6 +936,8 @@ def follow_line_behavior():
 
     if line == 0:
         error = 50   # Step 4: No line detected, steer right
+    elif line == 1:
+        error = 0
     elif 1 < line < 4:
         error = -25    # Step 5: Slightly too far right, steer slightly left
     elif line < 7:
