@@ -19,7 +19,7 @@ public class MazeRobot extends RobotController {
         super(robotName);
 
         sampleFound = false;
-        robotState = RobotState.CRUISING;
+        robotState = RobotState.COLLECTING_SAMPLE;
         stopThreshold = 7;
     }
 
@@ -49,6 +49,7 @@ public class MazeRobot extends RobotController {
 
     public void FINITE_STATE_MACHINE(){
         boolean SCHEDULED_BEHAVIORS_ACTIVE = false;
+        boolean CRUISING = false;
 
         while (true) {
             if (robotState == RobotState.CRUISING) {
@@ -58,16 +59,22 @@ public class MazeRobot extends RobotController {
                     System.out.println("Starting behaviors");
                 }
 
-                mbot.followLine();
+
+                if (!CRUISING) {
+                    mbot.followLine();
+                    CRUISING = true;
+                }
+
                 System.out.println("Cruising");
 
                 // Bot is close to an object
                 SensorSnapshot sensorData = awaitNewData();
+
                 if (sensorData.distance() < this.stopThreshold){
                     System.out.println("Object closer than threshold");
-                    mbot.stop();
                     // Disable behaviors running in background
-                    mbot.stopBehavior("AVOID_CRASHING"); SCHEDULED_BEHAVIORS_ACTIVE = false;
+                    mbot.stop();
+                    mbot.stopBehavior("AVOID_CRASHING"); SCHEDULED_BEHAVIORS_ACTIVE = false; CRUISING = false;
                     System.out.println("Bot stopped & behaviors disabled");
 
                     // Transition into analyzing object state
@@ -117,8 +124,13 @@ public class MazeRobot extends RobotController {
 
                 this.switchState(RobotState.CRUISING);
             }
+            else if (robotState == RobotState.COLLECTING_SAMPLE) {
+                System.out.println("Collecting Sample");
+                mbot.collectSample();
+                mbot.moveObject();
+                this.switchState(RobotState.CRUISING);
+            }
             else if (robotState == RobotState.MISSION_COMPLETE)  {
-
                 break; // Exit the loop
             }
         }
@@ -127,11 +139,8 @@ public class MazeRobot extends RobotController {
     public void run(){
 
         System.out.println("start");
-        mbot.moveObject();
-        while (true){
-
-        }
-        //System.out.println("Finished");
+        FINITE_STATE_MACHINE();
+        System.out.println("Finished");
     }
 
     /**

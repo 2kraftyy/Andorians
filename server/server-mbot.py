@@ -967,3 +967,21 @@ def handle_follow_line(payload):
     scheduler.start_behavior("FOLLOW_LINE", follow_line_behavior)
     return ok_response("Following Line")
 
+
+def collect_sample():
+    melody = [ # --// hot cross buns
+        (494, 0.5), (440, 0.5), (392, 1.0),
+        (494, 0.5), (440, 0.5), (392, 1.0),
+        (392, 0.25), (392, 0.25), (392, 0.25), (392, 0.25),
+        (440, 0.25), (440, 0.25), (440, 0.25), (440, 0.25),
+        (494, 0.5), (440, 0.5), (392, 1.0)
+    ]
+
+    for note, duration in melody:
+        cyberpi.audio.play_tone(note, duration)
+
+@register_command("COLLECT_SAMPLE")
+def handle_sample_collection(payload):
+    collect_sample()
+    return ok_response("Sample Collected!")
+

@@ -490,11 +490,6 @@ public class MBot2 {
         execute("MOVE_OBJECT", null);
     }
 
-    public void test() {
-        // For cruising
-        execute("TEST", null);
-    }
-
     private CommandResult<JsonNode> execute(String command, Map<String,Object> params) {
 
         String json = codec.encodeCommand(command, params);
@@ -516,4 +511,5 @@ public class MBot2 {
     public void followLine() {
         execute("FOLLOW_LINE",null);
     }
+    public void collectSample() {execute("COLLECT_SAMPLE",null);}
 }
