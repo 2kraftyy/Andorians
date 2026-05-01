@@ -20,7 +20,7 @@ public class MazeRobot extends RobotController {
 
         sampleFound = false;
         robotState = RobotState.CRUISING;
-        stopThreshold = 7;
+        stopThreshold = 9;
     }
 
     public void switchState(RobotState newState){
@@ -50,10 +50,9 @@ public class MazeRobot extends RobotController {
     public void FINITE_STATE_MACHINE(){
         boolean CRUISING = false;
 
-        while (true) {
+        while (!sampleFound) {
             if (robotState == RobotState.CRUISING) {
                 mbot.avoidCrashing(this.stopThreshold);
-
 
                 if (!CRUISING) {
                     mbot.followLine();
@@ -68,8 +67,10 @@ public class MazeRobot extends RobotController {
                 if (sensorData.distance() < this.stopThreshold){
                     System.out.println("Object closer than threshold");
                     // Disable behaviors running in background
+                    mbot.stopBehavior("FOLLOW_LINE");
+                    mbot.stopBehavior("AVOID_CRASHING");
                     mbot.stop();
-                    mbot.stopBehavior("AVOID_CRASHING"); CRUISING = false;
+                    CRUISING = false;
                     System.out.println("Bot stopped & behaviors disabled");
 
                     // Transition into analyzing object state
@@ -81,7 +82,7 @@ public class MazeRobot extends RobotController {
             else if (robotState == RobotState.ANALYZING_OBJECT) {
                 // If obj is a movable object transition to MOVING_OBJECT
                 // If obj is an immovable object transition to AVOIDING_OBJECT etc
-
+                mbot.stop(); mbot.stopBehavior("AVOID_CRASHING");
                 String detectedObject = detectObject();
                 System.out.println(detectedObject);
                 if (detectedObject != null) {
@@ -102,7 +103,6 @@ public class MazeRobot extends RobotController {
                         this.switchState(RobotState.MISSION_COMPLETE);
                     }
                 }
-
             }
 
             else if (robotState == RobotState.MOVING_OBJECT) {
@@ -116,7 +116,9 @@ public class MazeRobot extends RobotController {
             else if (robotState == RobotState.AVOIDING_OBJECT) {
                 // Do a procedure that avoids the object
                 // Once done moving the object and no obj is infront go back to CRUISING
-
+                System.out.println("AVOIDING OBJECT");
+                mbot.avoidObject();
+                System.out.println("DONE AVOIDING");
                 this.switchState(RobotState.CRUISING);
             }
             else if (robotState == RobotState.COLLECTING_SAMPLE) {
@@ -126,13 +128,13 @@ public class MazeRobot extends RobotController {
                 this.switchState(RobotState.CRUISING);
             }
             else if (robotState == RobotState.MISSION_COMPLETE)  {
-                break; // Exit the loop
+                mbot.stop();
+                sampleFound = true; // Exit the loop
             }
         }
     }
 
     public void run(){
-
         System.out.println("start");
         FINITE_STATE_MACHINE();
         System.out.println("Finished");

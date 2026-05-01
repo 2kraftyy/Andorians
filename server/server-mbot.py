@@ -9,8 +9,13 @@ import _thread
 
 
 # --- Configuration ---
+in_cis = True
 WIFI_SSID = "Sieh"
 WIFI_PASSWORD = "cingreek"
+if in_cis:
+    WIFI_SSID = "CIS_WiFi"
+    WIFI_PASSWORD = "CIS!2018#WiFi"
+
 ROBOT_ID = "Sieh"
 DISCOVERY_PORT = 9998
 COMMAND_PORT = 9990
@@ -897,7 +902,7 @@ def move_object_behavior():
 
 
             # Move backward towards the object
-            mbot2.straight(-9)
+            mbot2.straight(-16)
 
             # Push object sideways
             mbot2.drive_speed(-30, 50)

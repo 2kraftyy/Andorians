@@ -512,4 +512,5 @@ public class MBot2 {
         execute("FOLLOW_LINE",null);
     }
     public void collectSample() {execute("COLLECT_SAMPLE",null);}
+    public void avoidObject() {execute("AVOID_OBJECT",null);}
 }
