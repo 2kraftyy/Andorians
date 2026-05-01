@@ -19,7 +19,7 @@ public class MazeRobot extends RobotController {
         super(robotName);
 
         sampleFound = false;
-        robotState = RobotState.COLLECTING_SAMPLE;
+        robotState = RobotState.CRUISING;
         stopThreshold = 7;
     }
 
@@ -48,16 +48,11 @@ public class MazeRobot extends RobotController {
     }
 
     public void FINITE_STATE_MACHINE(){
-        boolean SCHEDULED_BEHAVIORS_ACTIVE = false;
         boolean CRUISING = false;
 
         while (true) {
             if (robotState == RobotState.CRUISING) {
-                if (!SCHEDULED_BEHAVIORS_ACTIVE) {
-                    SCHEDULED_BEHAVIORS_ACTIVE = true;
-                    mbot.avoidCrashing(this.stopThreshold);
-                    System.out.println("Starting behaviors");
-                }
+                mbot.avoidCrashing(this.stopThreshold);
 
 
                 if (!CRUISING) {
@@ -74,7 +69,7 @@ public class MazeRobot extends RobotController {
                     System.out.println("Object closer than threshold");
                     // Disable behaviors running in background
                     mbot.stop();
-                    mbot.stopBehavior("AVOID_CRASHING"); SCHEDULED_BEHAVIORS_ACTIVE = false; CRUISING = false;
+                    mbot.stopBehavior("AVOID_CRASHING"); CRUISING = false;
                     System.out.println("Bot stopped & behaviors disabled");
 
                     // Transition into analyzing object state
